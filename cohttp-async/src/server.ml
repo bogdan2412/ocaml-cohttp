@@ -53,7 +53,7 @@ let collect_errors writer ~f =
     [
       choice (Monitor.get_next_error monitor) (fun e ->
           Error (Exn.Reraised ("Cohttp_async.Server.collect_errors", e)));
-      choice (try_with ~name:"Cohttp_async.Server.collect_errors" f) Fn.id;
+      choice (try_with ~rest:`Raise ~run:`Now ~name:"Cohttp_async.Server.collect_errors" f) Fn.id;
     ]
 
 let handle_client handle_request sock rd wr =
@@ -133,7 +133,7 @@ let error_body_default = "<html><body><h1>404 Not Found</h1></body></html>"
 
 let respond_with_file ?flush ?headers ?(error_body = error_body_default)
     filename =
-  Monitor.try_with ~run:`Now (fun () ->
+  Monitor.try_with ~rest:`Raise ~run:`Now (fun () ->
       Reader.open_file filename >>= fun rd ->
       let body = `Pipe (Reader.pipe rd) in
       let mime_type = Magic_mime.lookup filename in
