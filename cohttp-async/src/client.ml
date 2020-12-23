@@ -65,7 +65,7 @@ let request ?interrupt ?ssl_config ?uri ?(body = `Empty) req =
   (* Connect to the remote side *)
   let uri = match uri with Some t -> t | None -> Request.uri req in
   Net.connect_uri ?interrupt ?ssl_config uri >>= fun (ic, oc) ->
-  try_with (fun () ->
+  try_with ~rest:`Raise ~run:`Now (fun () ->
       Request.write
         (fun writer -> Body_raw.write_body Request.write_body body writer)
         req oc
