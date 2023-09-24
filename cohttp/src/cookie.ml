@@ -119,12 +119,19 @@ module Set_cookie_hdr = struct
                  (if v.[0] = '.' then Stringext.string_after v 1 else v))
         with Not_found -> None
       in
+      let expiration =
+        try
+          let v = List.assoc "max-age" attrs in
+          `Max_age (Int64.of_string v)
+        with Not_found ->
+          (* TODO: respect expires attribute *)
+          `Session
+      in
       (* TODO: trim wsp *)
       ( fst cookie,
         {
           cookie;
-          (* TODO: respect expires attribute *)
-          expiration = `Session;
+          expiration;
           domain;
           path;
           http_only = List.mem_assoc "httponly" attrs;
